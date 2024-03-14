@@ -26,7 +26,7 @@ body {
 
 
 .tree1 {
-    transform: translate(-220px, -15vh);
+    transform: translate(-220px, -10vh);
     width: 250px;
 }
 .tree2 {
@@ -61,6 +61,11 @@ body {
     cursor: pointer;
     transition: transform .3s ease;
 }
+
+.game-button .play {
+    display: none;
+}
+
 
 .game-button:hover {
     transform: scale(1.2);
