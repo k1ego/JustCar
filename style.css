@@ -9,7 +9,8 @@ body {
 .car {
     position: absolute;
     width: 80px;
-    bottom: 0;
+    /* позиционирование машинки от низа */
+    transform: translateY(75vh)
 }
 
 
@@ -26,7 +27,7 @@ body {
 
 
 .tree1 {
-    transform: translate(-220px, -10vh);
+    transform: translate(-220px, -15vh);
     width: 250px;
 }
 .tree2 {
@@ -34,11 +35,11 @@ body {
     width: 300px;
 }
 .tree3 {
-    transform: translate(-200px, 70vh);
+    transform: translate(-200px, 80vh);
     width: 230px;
 }
 .tree4 {
-    transform: translate(240px, -5vh);
+    transform: translate(240px, -15vh);
     width: 280px;
 }
 .tree5 {

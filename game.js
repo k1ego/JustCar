@@ -2,13 +2,23 @@
 	let isPause = false;
 	let animationId = null;
 
-	const speed = 3;
+	const speed = 10;
 
 
 	const car = document.querySelector('.car');
 	const trees = document.querySelectorAll('.tree');
 
+    const carCoords = getCoords(car);
+    const carMoveInfo = {
+			top: null,
+			bottom: null,
+			left: null,
+			right: null,
+		};
+
+
     const treesCoords = []
+
 
     for (let i = 0; i < trees.length; i++){
         const tree = trees[i]
@@ -16,6 +26,99 @@
         treesCoords.push(coordsTree)
     }
 
+    // отследим нажатие клавиши keydown и keyup
+
+    document.addEventListener('keydown', (event) => {
+        // получили нажатую кнопку
+        const code = event.code;
+    
+        if (code === 'ArrowUp' && carMoveInfo.top === null){
+            carMoveInfo.top = requestAnimationFrame(carMoveTop);
+        }
+
+
+        else if (code === 'ArrowDown' && carMoveInfo.bottom === null) {
+			carMoveInfo.bottom = requestAnimationFrame(carMoveBottom);
+		}
+
+
+        else if (code === 'ArrowLeft' && carMoveInfo.left === null) {
+            carMoveInfo.left = requestAnimationFrame(carMoveLeft);
+		}
+
+
+        else if (code === 'ArrowRight' && carMoveInfo.right === null) {
+			carMoveInfo.right = requestAnimationFrame(carMoveRight);
+		}
+
+    })
+
+    // когда клавиша отпускается - мы отменяем анимацию 
+    document.addEventListener('keyup', (event) => {
+        // получили нажатую кнопку
+        const code = event.code;
+
+        if (code === 'ArrowUp'){
+            cancelAnimationFrame(carMoveInfo.top);
+            carMoveInfo.top = null;
+        }
+
+
+        else if (code === 'ArrowDown') {
+			cancelAnimationFrame(carMoveInfo.bottom);
+            carMoveInfo.bottom = null;
+		}
+
+
+        else if (code === 'ArrowLeft') {
+            cancelAnimationFrame(carMoveInfo.left);
+            carMoveInfo.left = null;
+		}
+
+
+        else if (code === 'ArrowRight') {
+			cancelAnimationFrame(carMoveInfo.right);
+            carMoveInfo.right = null;
+		}
+    });
+
+
+    // опишем движение машинки на кнопках
+
+    function carMoveTop() {
+        const newY = carCoords.y - 5;
+        carCoords.y = newY;
+        carToMove(carCoords.x, newY);
+        carMoveInfo.top = requestAnimationFrame(carMoveTop);
+    }
+
+    function carMoveBottom() {
+        const newY = carCoords.y + 5;
+        carCoords.y = newY;
+        carToMove(carCoords.x, newY);
+        carMoveInfo.bottom = requestAnimationFrame(carMoveBottom);
+    }
+
+
+    function carMoveLeft() {
+        const newX = carCoords.x - 5;
+        carCoords.x = newX;
+        carToMove(newX, carCoords.y);
+        carMoveInfo.left = requestAnimationFrame(carMoveLeft);
+    }
+
+
+    function carMoveRight() {
+        const newX = carCoords.x + 5;
+        carCoords.x = newX;
+        carToMove(newX, carCoords.y);
+        carMoveInfo.right = requestAnimationFrame(carMoveRight);
+    }
+
+    // перезапись анимации машинки при нажатии на кнопку
+    function carToMove (x, y) {
+        car.style.transform = `translate(${x}px, ${y}px)`;
+    }
 
 	animationId = requestAnimationFrame(startGame);
 
@@ -39,7 +142,8 @@
     
             // доходим до конца экрана и перемещаем вверх дерево
             if (newYCoord > window.innerHeight) {
-                newYCoord = -tree.height;
+                // по большему дереву отрисовываем новые
+                newYCoord = -370;
             }
 
             // перезаписываем координату y в массиве
