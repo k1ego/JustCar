@@ -6,7 +6,16 @@
 
 
 	const car = document.querySelector('.car');
+    const carHeight = car.clientHeight;
+    const carWidth = car.clientWidth;
+
+    const road = document.querySelector('.road')
+    const roadHeight = road.clientHeight;
+    const roadWidth = road.clientWidth;
+
 	const trees = document.querySelectorAll('.tree');
+
+    console.dir(car)
 
     const carCoords = getCoords(car);
     const carMoveInfo = {
@@ -29,25 +38,35 @@
     // отследим нажатие клавиши keydown и keyup
 
     document.addEventListener('keydown', (event) => {
+
+        // условие, чтобы машинка не вдигалась во время паузы
+        if (isPause) return;
+
         // получили нажатую кнопку
         const code = event.code;
     
         if (code === 'ArrowUp' && carMoveInfo.top === null){
+
+            if (carMoveInfo.bottom) return;
+            // первоначальный и единственный запуск анимации - как раз ее мы отменяем в keyup
             carMoveInfo.top = requestAnimationFrame(carMoveTop);
         }
 
 
         else if (code === 'ArrowDown' && carMoveInfo.bottom === null) {
+            if (carMoveInfo.top) return;
 			carMoveInfo.bottom = requestAnimationFrame(carMoveBottom);
 		}
 
 
         else if (code === 'ArrowLeft' && carMoveInfo.left === null) {
+            if (carMoveInfo.right) return;
             carMoveInfo.left = requestAnimationFrame(carMoveLeft);
 		}
 
 
         else if (code === 'ArrowRight' && carMoveInfo.right === null) {
+            if (carMoveInfo.left) return;
 			carMoveInfo.right = requestAnimationFrame(carMoveRight);
 		}
 
@@ -87,6 +106,9 @@
 
     function carMoveTop() {
         const newY = carCoords.y - 5;
+        // не даем выехать за пределы экрана вверх
+        if (newY < 0) return;
+
         carCoords.y = newY;
         carToMove(carCoords.x, newY);
         carMoveInfo.top = requestAnimationFrame(carMoveTop);
@@ -94,6 +116,9 @@
 
     function carMoveBottom() {
         const newY = carCoords.y + 5;
+        // не даем выехать за нижние пределы экрана
+        if ((newY + carHeight) > roadHeight) return;
+
         carCoords.y = newY;
         carToMove(carCoords.x, newY);
         carMoveInfo.bottom = requestAnimationFrame(carMoveBottom);
@@ -102,6 +127,9 @@
 
     function carMoveLeft() {
         const newX = carCoords.x - 5;
+
+        if (newX < - roadWidth / 2 + carWidth / 2) return;
+
         carCoords.x = newX;
         carToMove(newX, carCoords.y);
         carMoveInfo.left = requestAnimationFrame(carMoveLeft);
@@ -110,6 +138,9 @@
 
     function carMoveRight() {
         const newX = carCoords.x + 5;
+
+        if (newX > roadWidth / 2 - carWidth / 2) return;
+
         carCoords.x = newX;
         carToMove(newX, carCoords.y);
         carMoveInfo.right = requestAnimationFrame(carMoveRight);
@@ -173,6 +204,11 @@
 		// отрисовывем разные кнопки, при нажатии на паузу останавливаем анимацию
 		if (isPause) {
 			cancelAnimationFrame(animationId);
+            cancelAnimationFrame(carMoveInfo.top);
+			cancelAnimationFrame(carMoveInfo.bottom);
+            cancelAnimationFrame(carMoveInfo.left);
+			cancelAnimationFrame(carMoveInfo.right);
+
 			gameButton.children[0].style.display = 'none';
 			gameButton.children[1].style.display = 'initial';
 		} else {
