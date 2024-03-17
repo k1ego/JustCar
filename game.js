@@ -7,32 +7,32 @@
 	const car = document.querySelector('.car');
 	const carHeight = car.clientHeight;
 	const carWidth = car.clientWidth;
-
-	const coin = document.querySelector('.coin');
-	const coinCoord = getCoords(coin);
-	const coinWidth = coin.clientWidth;
-
-	const danger = document.querySelector('.danger');
-	const dangerCoord = getCoords(danger);
-	const dangerWidth = danger.clientWidth;
-
-	const arrow = document.querySelector('.arrow');
-	const arrowCoord = getCoords(arrow);
-	const arrowWidth = arrow.clientWidth;
-
-	const road = document.querySelector('.road');
-	const roadHeight = road.clientHeight;
-	const roadWidth = road.clientWidth;
-
-	const trees = document.querySelectorAll('.tree');
-
-	const carCoords = getCoords(car);
+    const carCoords = getCoords(car);
 	const carMoveInfo = {
 		top: null,
 		bottom: null,
 		left: null,
 		right: null,
 	};
+
+	const coin = document.querySelector('.coin');
+	const coinCoord = getCoords(coin);
+	const coinWidth = coin.clientWidth;
+    const coinHeigh = coin.clientHeight;
+
+	const danger = document.querySelector('.danger');
+	// const dangerCoord = getCoords(danger);
+	// const dangerWidth = danger.clientWidth;
+
+	const arrow = document.querySelector('.arrow');
+	// const arrowCoord = getCoords(arrow);
+	// const arrowWidth = arrow.clientWidth;
+
+	const road = document.querySelector('.road');
+	const roadHeight = road.clientHeight;
+	const roadWidth = road.clientWidth;
+
+	const trees = document.querySelectorAll('.tree');
 
 	const treesCoords = [];
 
@@ -46,7 +46,7 @@
 
 	document.addEventListener('keydown', event => {
 		// условие, чтобы машинка не вдигалась во время паузы
-		if (isPause) return;
+		// if (isPause) return;
 
 		// получили нажатую кнопку
 		const code = event.code;
@@ -88,7 +88,7 @@
 	function carMoveTop() {
 		const newY = carCoords.y - 5;
 		// не даем выехать за пределы экрана вверх
-		if (newY < 0) return;
+		// if (newY < 0) return;
 
 		carCoords.y = newY;
 		carToMove(carCoords.x, newY);
@@ -98,7 +98,7 @@
 	function carMoveBottom() {
 		const newY = carCoords.y + 5;
 		// не даем выехать за нижние пределы экрана
-		if (newY + carHeight > roadHeight) return;
+		// if (newY + carHeight > roadHeight) return;
 
 		carCoords.y = newY;
 		carToMove(carCoords.x, newY);
@@ -108,7 +108,7 @@
 	function carMoveLeft() {
 		const newX = carCoords.x - 5;
 
-		if (newX < -roadWidth / 2 + carWidth / 2) return;
+		// if (newX < -roadWidth / 2 + carWidth / 2) return;
 
 		carCoords.x = newX;
 		carToMove(newX, carCoords.y);
@@ -118,7 +118,7 @@
 	function carMoveRight() {
 		const newX = carCoords.x + 5;
 
-		if (newX > roadWidth / 2 - carWidth / 2) return;
+		// if (newX > roadWidth / 2 - carWidth / 2) return;
 
 		carCoords.x = newX;
 		carToMove(newX, carCoords.y);
@@ -135,8 +135,8 @@
 	function startGame() {
 		treesAnimation();
 		elementAyimation (coin, coinCoord, coinWidth, -100);
-        elementAyimation (danger, dangerCoord, dangerWidth, -250);
-        elementAyimation (arrow, arrowCoord, arrowWidth, -600);
+        // elementAyimation (danger, dangerCoord, dangerWidth, -250);
+        // elementAyimation (arrow, arrowCoord, arrowWidth, -600);
 		animationId = requestAnimationFrame(startGame);
 	}
 
@@ -166,7 +166,7 @@
 		}
 	}
 
-    
+
 
     function elementAyimation (element, elementCoord, elementWidth, elementYInitialCoord) {
 
@@ -176,7 +176,7 @@
 		// условие на то, если монетка вышла за пределы экрана
 		// и через сколько будет появляеться новая монетка
 		if (newYCoord > window.innerHeight) {
-			newYCoord = -250;
+			newYCoord = elementYInitialCoord;
 
 			// расчитаем координату для появления новой монетки
 			const direction = parseInt(Math.random() * 2);
@@ -215,6 +215,33 @@
 
 		return { x: numericX, y: numericY };
 	}
+
+    // реализация коллизии для элементов
+    function hasCollision () {
+        const carYTop = carCoords.y;
+        const carYBottom = carCoords.y + carHeight;
+
+        const carXLeft = carCoords.x - carWidth / 2; // (-carWidth/2) тк позиционирование происходит от центра,
+        const carXright = carCoords.x + carWidth / 2; // без этого берем еще половину машинки, где ее нет.
+
+        const coinYTop = coinCoord.y;
+        const coinYBottom = coinCoord.y + coinHeigh;
+
+        const coinXLeft = coinCoord.x - coinWidth / 2;
+        const coinXright = coinCoord.x + coinWidth / 2;
+
+
+        if (carYTop > coinYBottom || carYBottom < coinYTop) { // условие на отсутствие коллизии по OY
+            return false;
+        }
+
+        if (carXLeft > coinXright || carXright < coinXLeft) { // условие на отсутствие коллизии по OX
+            return false;
+        }
+
+        return true;
+    }
+
 
 	const gameButton = document.querySelector('.game-button');
 	addEventListener('click', () => {
