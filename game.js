@@ -9,13 +9,16 @@
     const carHeight = car.clientHeight;
     const carWidth = car.clientWidth;
 
+    const coin = document.querySelector('.coin')
+    const coinCoord = getCoords(coin)
+
+
     const road = document.querySelector('.road')
     const roadHeight = road.clientHeight;
     const roadWidth = road.clientWidth;
 
 	const trees = document.querySelectorAll('.tree');
 
-    console.dir(car)
 
     const carCoords = getCoords(car);
     const carMoveInfo = {
@@ -46,27 +49,22 @@
         const code = event.code;
     
         if (code === 'ArrowUp' && carMoveInfo.top === null){
-
-            if (carMoveInfo.bottom) return;
             // первоначальный и единственный запуск анимации - как раз ее мы отменяем в keyup
             carMoveInfo.top = requestAnimationFrame(carMoveTop);
         }
 
 
         else if (code === 'ArrowDown' && carMoveInfo.bottom === null) {
-            if (carMoveInfo.top) return;
 			carMoveInfo.bottom = requestAnimationFrame(carMoveBottom);
 		}
 
 
         else if (code === 'ArrowLeft' && carMoveInfo.left === null) {
-            if (carMoveInfo.right) return;
             carMoveInfo.left = requestAnimationFrame(carMoveLeft);
 		}
 
 
         else if (code === 'ArrowRight' && carMoveInfo.right === null) {
-            if (carMoveInfo.left) return;
 			carMoveInfo.right = requestAnimationFrame(carMoveRight);
 		}
 
@@ -155,6 +153,7 @@
 
 	function startGame() {
 		treesAnimation();
+        coinAnimation();
 		animationId = requestAnimationFrame(startGame);
 	}
 
@@ -183,10 +182,40 @@
             tree.style.transform = `translate(${coords.x}px, ${newYCoord}px)`;
 		}
 
-	}
+	} 
+
+    function coinAnimation () {
+        let newYCoord = coinCoord.y + speed;
+        let newXCoord = coinCoord.x;
+
+        // условие на то, через сколько будет появляеться новая монетка
+        if (newYCoord > window.innerHeight) {
+            newYCoord = -250;
+
+            // расчитаем координату для появления новой монетки
+            const direction = parseInt(Math.random() * 2)
+            const randomXCoord = parseInt(Math.random() * (roadWidth / 2 + 1));
+    
+            // if (direction === 0){ // двигаем влево
+            //     newXCoord = -randomXCoord;
+            // }
+    
+            // else if (direction === 1){ // двигаем вправо 
+            //     newXCoord = randomXCoord;
+            // }  то же самое что код ниже
+    
+            newXCoord = direction === 0
+                ? -randomXCoord
+                : randomXCoord
+            }
+    
+        coinCoord.x = newXCoord;
+        coinCoord.y = newYCoord;
+        coin.style.transform = `translate(${newXCoord}px, ${newYCoord}px)`;
+    }
+
 
 	// вытащим расположение дерева, то есть ед. высоты окна
-
 	function getCoords(element) {
 		const matrix = window.getComputedStyle(element).transform;
 		const array = matrix.split(',');
