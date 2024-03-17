@@ -22,7 +22,7 @@
 	const coinInfo = createElementInfo(coin);
 
 	const danger = document.querySelector('.danger');
-	// const dangerInfo = createElementInfo(danger);
+	const dangerInfo = createElementInfo(danger);
 
 	const arrow = document.querySelector('.arrow');
 	// const arrowInfo = createElementInfo(arrow);
@@ -31,7 +31,10 @@
 	const roadHeight = road.clientHeight;
 	const roadWidth = road.clientWidth;
 
+    const gameButton = document.querySelector('.game-button');
     const gameScore = document.querySelector('.game-score')
+    const backdrop = document.querySelector('.backdrop');
+    const restartButton = document.querySelector('.restart-button')
 
 	const trees = document.querySelectorAll('.tree');
 
@@ -47,19 +50,19 @@
 
 	document.addEventListener('keydown', event => {
 		// условие, чтобы машинка не вдигалась во время паузы
-		// if (isPause) return;
+		if (isPause) return;
 
 		// получили нажатую кнопку
 		const code = event.code;
 
-		if (code === 'ArrowUp' && carInfo.move.top === null) {
+		if (code === 'ArrowUp' || code === 'KeyW' && carInfo.move.top === null) {
 			// первоначальный и единственный запуск анимации - как раз ее мы отменяем в keyup
 			carInfo.move.top = requestAnimationFrame(carMoveTop);
-		} else if (code === 'ArrowDown' && carInfo.move.bottom === null) {
+		} else if (code === 'ArrowDown' || code === 'KeyS' && carInfo.move.bottom === null) {
 			carInfo.move.bottom = requestAnimationFrame(carMoveBottom);
-		} else if (code === 'ArrowLeft' && carInfo.move.left === null) {
+		} else if (code === 'ArrowLeft' || code === 'KeyA' && carInfo.move.left === null) {
 			carInfo.move.left = requestAnimationFrame(carMoveLeft);
-		} else if (code === 'ArrowRight' && carInfo.move.right === null) {
+		} else if (code === 'ArrowRight' || code === 'KeyD' && carInfo.move.right === null) {
 			carInfo.move.right = requestAnimationFrame(carMoveRight);
 		}
 	});
@@ -69,16 +72,16 @@
 		// получили нажатую кнопку
 		const code = event.code;
 
-		if (code === 'ArrowUp') {
+		if (code === 'ArrowUp' || code === 'KeyW') {
 			cancelAnimationFrame(carInfo.move.top);
 			carInfo.move.top = null;
-		} else if (code === 'ArrowDown') {
+		} else if (code === 'ArrowDown' || code === 'KeyS') {
 			cancelAnimationFrame(carInfo.move.bottom);
 			carInfo.move.bottom = null;
-		} else if (code === 'ArrowLeft') {
+		} else if (code === 'ArrowLeft' || code === 'KeyA') {
 			cancelAnimationFrame(carInfo.move.left);
 			carInfo.move.left = null;
-		} else if (code === 'ArrowRight') {
+		} else if (code === 'ArrowRight' || code === 'KeyD') {
 			cancelAnimationFrame(carInfo.move.right);
 			carInfo.move.right = null;
 		}
@@ -100,7 +103,7 @@
 	function carMoveTop() {
 		const newY = carInfo.coords.y - 5;
 		// не даем выехать за пределы экрана вверх
-		// if (newY < 0) return;
+		if (newY < 0) return;
 
 		carInfo.coords.y = newY;
 		carToMove(carInfo.coords.x, newY);
@@ -110,7 +113,7 @@
 	function carMoveBottom() {
 		const newY = carInfo.coords.y + 5;
 		// не даем выехать за нижние пределы экрана
-		// if (newY + carInfo.height > roadHeight) return;
+		if (newY + carInfo.height > roadHeight) return;
 
 		carInfo.coords.y = newY;
 		carToMove(carInfo.coords.x, newY);
@@ -120,7 +123,7 @@
 	function carMoveLeft() {
 		const newX = carInfo.coords.x - 5;
 
-		// if (newX < -roadWidth / 2 + carInfo.width / 2) return;
+		if (newX < -roadWidth / 2 + carInfo.width / 2) return;
 
 		carInfo.coords.x = newX;
 		carToMove(newX, carInfo.coords.y);
@@ -130,7 +133,7 @@
 	function carMoveRight() {
 		const newX = carInfo.coords.x + 5;
 
-		// if (newX > roadWidth / 2 - carInfo.width / 2) return;
+		if (newX > roadWidth / 2 - carInfo.width / 2) return;
 
 		carInfo.coords.x = newX;
 		carToMove(newX, carInfo.coords.y);
@@ -145,7 +148,15 @@
 	animationId = requestAnimationFrame(startGame);
 
 	function startGame() {
+
+        elementAnimation (danger, dangerInfo, -250);
+
+        if (hasCollision(carInfo, dangerInfo)) {
+            return finishGame();
+        }
+
 		treesAnimation();
+
 		elementAnimation (coin, coinInfo, -100);
 
         if (coinInfo.visible && hasCollision(carInfo, coinInfo)) {
@@ -159,9 +170,7 @@
         }
 
 
-
-        // elementAnimation (danger, dangerCoords, dangerWidth, -250);
-        // elementAnimation (arrow, arrowCoord, arrowWidth, -600);
+        // elementAnimation (arrow, arrowInfo, -600);
 
 		animationId = requestAnimationFrame(startGame);
 	}
@@ -276,17 +285,32 @@
     }
 
 
-	const gameButton = document.querySelector('.game-button');
-	addEventListener('click', () => {
+    function cancelAnimations () {
+        cancelAnimationFrame(animationId);
+		cancelAnimationFrame(carInfo.move.top);
+		cancelAnimationFrame(carInfo.move.bottom);
+		cancelAnimationFrame(carInfo.move.left);
+		cancelAnimationFrame(carInfo.move.right);
+    }
+
+
+    function finishGame () {
+        cancelAnimations();
+        backdrop.style.display = 'flex'
+        gameScore.style.display = 'none';
+        gameButton.style.display = 'none';
+        const scoreText = backdrop.querySelector('.finish-text-score');
+		scoreText.innerText = score;
+    }
+
+
+
+	gameButton.addEventListener('click', () => {
 		isPause = !isPause;
 		// отрисовывем разные кнопки, при нажатии на паузу останавливаем анимацию
 		if (isPause) {
-			cancelAnimationFrame(animationId);
-			cancelAnimationFrame(carInfo.move.top);
-			cancelAnimationFrame(carInfo.move.bottom);
-			cancelAnimationFrame(carInfo.move.left);
-			cancelAnimationFrame(carInfo.move.right);
-
+            cancelAnimations();
+            // кнопки меняются при паузе
 			gameButton.children[0].style.display = 'none';
 			gameButton.children[1].style.display = 'initial';
 		} else {
@@ -295,4 +319,9 @@
 			gameButton.children[1].style.display = 'none';
 		}
 	});
+
+    // перезагрузка страницы при нажатии на кнопку в конце игры
+    restartButton.addEventListener('click', () => {
+        window.location.reload();
+    });
 })()
