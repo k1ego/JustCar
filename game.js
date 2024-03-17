@@ -2,158 +2,141 @@
 	let isPause = false;
 	let animationId = null;
 
-	const speed = 10;
-
+	const speed = 5;
 
 	const car = document.querySelector('.car');
-    const carHeight = car.clientHeight;
-    const carWidth = car.clientWidth;
+	const carHeight = car.clientHeight;
+	const carWidth = car.clientWidth;
 
-    const coin = document.querySelector('.coin')
-    const coinCoord = getCoords(coin)
+	const coin = document.querySelector('.coin');
+	const coinCoord = getCoords(coin);
+	const coinWidth = coin.clientWidth;
 
+	const danger = document.querySelector('.danger');
+	const dangerCoord = getCoords(danger);
+	const dangerWidth = danger.clientWidth;
 
-    const road = document.querySelector('.road')
-    const roadHeight = road.clientHeight;
-    const roadWidth = road.clientWidth;
+	const arrow = document.querySelector('.arrow');
+	const arrowCoord = getCoords(arrow);
+	const arrowWidth = arrow.clientWidth;
+
+	const road = document.querySelector('.road');
+	const roadHeight = road.clientHeight;
+	const roadWidth = road.clientWidth;
 
 	const trees = document.querySelectorAll('.tree');
 
+	const carCoords = getCoords(car);
+	const carMoveInfo = {
+		top: null,
+		bottom: null,
+		left: null,
+		right: null,
+	};
 
-    const carCoords = getCoords(car);
-    const carMoveInfo = {
-			top: null,
-			bottom: null,
-			left: null,
-			right: null,
-		};
+	const treesCoords = [];
 
+	for (let i = 0; i < trees.length; i++) {
+		const tree = trees[i];
+		const coordsTree = getCoords(tree);
+		treesCoords.push(coordsTree);
+	}
 
-    const treesCoords = []
+	// отследим нажатие клавиши keydown и keyup
 
+	document.addEventListener('keydown', event => {
+		// условие, чтобы машинка не вдигалась во время паузы
+		if (isPause) return;
 
-    for (let i = 0; i < trees.length; i++){
-        const tree = trees[i]
-        const coordsTree = getCoords(tree)
-        treesCoords.push(coordsTree)
-    }
+		// получили нажатую кнопку
+		const code = event.code;
 
-    // отследим нажатие клавиши keydown и keyup
-
-    document.addEventListener('keydown', (event) => {
-
-        // условие, чтобы машинка не вдигалась во время паузы
-        if (isPause) return;
-
-        // получили нажатую кнопку
-        const code = event.code;
-    
-        if (code === 'ArrowUp' && carMoveInfo.top === null){
-            // первоначальный и единственный запуск анимации - как раз ее мы отменяем в keyup
-            carMoveInfo.top = requestAnimationFrame(carMoveTop);
-        }
-
-
-        else if (code === 'ArrowDown' && carMoveInfo.bottom === null) {
+		if (code === 'ArrowUp' && carMoveInfo.top === null) {
+			// первоначальный и единственный запуск анимации - как раз ее мы отменяем в keyup
+			carMoveInfo.top = requestAnimationFrame(carMoveTop);
+		} else if (code === 'ArrowDown' && carMoveInfo.bottom === null) {
 			carMoveInfo.bottom = requestAnimationFrame(carMoveBottom);
-		}
-
-
-        else if (code === 'ArrowLeft' && carMoveInfo.left === null) {
-            carMoveInfo.left = requestAnimationFrame(carMoveLeft);
-		}
-
-
-        else if (code === 'ArrowRight' && carMoveInfo.right === null) {
+		} else if (code === 'ArrowLeft' && carMoveInfo.left === null) {
+			carMoveInfo.left = requestAnimationFrame(carMoveLeft);
+		} else if (code === 'ArrowRight' && carMoveInfo.right === null) {
 			carMoveInfo.right = requestAnimationFrame(carMoveRight);
 		}
+	});
 
-    })
+	// когда клавиша отпускается - мы отменяем анимацию
+	document.addEventListener('keyup', event => {
+		// получили нажатую кнопку
+		const code = event.code;
 
-    // когда клавиша отпускается - мы отменяем анимацию 
-    document.addEventListener('keyup', (event) => {
-        // получили нажатую кнопку
-        const code = event.code;
-
-        if (code === 'ArrowUp'){
-            cancelAnimationFrame(carMoveInfo.top);
-            carMoveInfo.top = null;
-        }
-
-
-        else if (code === 'ArrowDown') {
+		if (code === 'ArrowUp') {
+			cancelAnimationFrame(carMoveInfo.top);
+			carMoveInfo.top = null;
+		} else if (code === 'ArrowDown') {
 			cancelAnimationFrame(carMoveInfo.bottom);
-            carMoveInfo.bottom = null;
-		}
-
-
-        else if (code === 'ArrowLeft') {
-            cancelAnimationFrame(carMoveInfo.left);
-            carMoveInfo.left = null;
-		}
-
-
-        else if (code === 'ArrowRight') {
+			carMoveInfo.bottom = null;
+		} else if (code === 'ArrowLeft') {
+			cancelAnimationFrame(carMoveInfo.left);
+			carMoveInfo.left = null;
+		} else if (code === 'ArrowRight') {
 			cancelAnimationFrame(carMoveInfo.right);
-            carMoveInfo.right = null;
+			carMoveInfo.right = null;
 		}
-    });
+	});
 
+	// опишем движение машинки на кнопках
 
-    // опишем движение машинки на кнопках
+	function carMoveTop() {
+		const newY = carCoords.y - 5;
+		// не даем выехать за пределы экрана вверх
+		if (newY < 0) return;
 
-    function carMoveTop() {
-        const newY = carCoords.y - 5;
-        // не даем выехать за пределы экрана вверх
-        if (newY < 0) return;
+		carCoords.y = newY;
+		carToMove(carCoords.x, newY);
+		carMoveInfo.top = requestAnimationFrame(carMoveTop);
+	}
 
-        carCoords.y = newY;
-        carToMove(carCoords.x, newY);
-        carMoveInfo.top = requestAnimationFrame(carMoveTop);
-    }
+	function carMoveBottom() {
+		const newY = carCoords.y + 5;
+		// не даем выехать за нижние пределы экрана
+		if (newY + carHeight > roadHeight) return;
 
-    function carMoveBottom() {
-        const newY = carCoords.y + 5;
-        // не даем выехать за нижние пределы экрана
-        if ((newY + carHeight) > roadHeight) return;
+		carCoords.y = newY;
+		carToMove(carCoords.x, newY);
+		carMoveInfo.bottom = requestAnimationFrame(carMoveBottom);
+	}
 
-        carCoords.y = newY;
-        carToMove(carCoords.x, newY);
-        carMoveInfo.bottom = requestAnimationFrame(carMoveBottom);
-    }
+	function carMoveLeft() {
+		const newX = carCoords.x - 5;
 
+		if (newX < -roadWidth / 2 + carWidth / 2) return;
 
-    function carMoveLeft() {
-        const newX = carCoords.x - 5;
+		carCoords.x = newX;
+		carToMove(newX, carCoords.y);
+		carMoveInfo.left = requestAnimationFrame(carMoveLeft);
+	}
 
-        if (newX < - roadWidth / 2 + carWidth / 2) return;
+	function carMoveRight() {
+		const newX = carCoords.x + 5;
 
-        carCoords.x = newX;
-        carToMove(newX, carCoords.y);
-        carMoveInfo.left = requestAnimationFrame(carMoveLeft);
-    }
+		if (newX > roadWidth / 2 - carWidth / 2) return;
 
+		carCoords.x = newX;
+		carToMove(newX, carCoords.y);
+		carMoveInfo.right = requestAnimationFrame(carMoveRight);
+	}
 
-    function carMoveRight() {
-        const newX = carCoords.x + 5;
-
-        if (newX > roadWidth / 2 - carWidth / 2) return;
-
-        carCoords.x = newX;
-        carToMove(newX, carCoords.y);
-        carMoveInfo.right = requestAnimationFrame(carMoveRight);
-    }
-
-    // перезапись анимации машинки при нажатии на кнопку
-    function carToMove (x, y) {
-        car.style.transform = `translate(${x}px, ${y}px)`;
-    }
+	// перезапись анимации машинки при нажатии на кнопку
+	function carToMove(x, y) {
+		car.style.transform = `translate(${x}px, ${y}px)`;
+	}
 
 	animationId = requestAnimationFrame(startGame);
 
 	function startGame() {
 		treesAnimation();
-        coinAnimation();
+		elementAyimation (coin, coinCoord, coinWidth, -100);
+        elementAyimation (danger, dangerCoord, dangerWidth, -250);
+        elementAyimation (arrow, arrowCoord, arrowWidth, -600);
 		animationId = requestAnimationFrame(startGame);
 	}
 
@@ -162,57 +145,63 @@
 	function treesAnimation() {
 		// достаем коорд. по у для дерева и после прибавления координаты (speed) вписываем новое зн. по у
 
-        for (let i = 0; i < trees.length; i++) {
+		for (let i = 0; i < trees.length; i++) {
 			const tree = trees[i];
 
-            // записываем координаты дерева
-            const coords = treesCoords[i]
+			// записываем координаты дерева
+			const coords = treesCoords[i];
 
-            let newYCoord = coords.y + speed;
+			let newYCoord = coords.y + speed;
+
+			// доходим до конца экрана и перемещаем вверх дерево
+			if (newYCoord > window.innerHeight) {
+				// по большему дереву отрисовываем новые
+				newYCoord = -370;
+			}
+
+			// перезаписываем координату y в массиве
+			treesCoords[i].y = newYCoord;
+
+			tree.style.transform = `translate(${coords.x}px, ${newYCoord}px)`;
+		}
+	}
+
     
-            // доходим до конца экрана и перемещаем вверх дерево
-            if (newYCoord > window.innerHeight) {
-                // по большему дереву отрисовываем новые
-                newYCoord = -370;
-            }
 
-            // перезаписываем координату y в массиве
-            treesCoords[i].y = newYCoord;
+    function elementAyimation (element, elementCoord, elementWidth, elementYInitialCoord) {
 
-            tree.style.transform = `translate(${coords.x}px, ${newYCoord}px)`;
+		let newYCoord = elementCoord.y + speed;
+		let newXCoord = elementCoord.x;
+
+		// условие на то, если монетка вышла за пределы экрана
+		// и через сколько будет появляеться новая монетка
+		if (newYCoord > window.innerHeight) {
+			newYCoord = -250;
+
+			// расчитаем координату для появления новой монетки
+			const direction = parseInt(Math.random() * 2);
+			// дорога попалам и ширина монетки попалам, чтобы рендер был в пределах дороги
+			const maxXCoord = roadWidth / 2 + 1 - elementWidth / 2;
+			const randomXCoord = parseInt(Math.random() * maxXCoord);
+
+			// if (direction === 0){ // двигаем влево
+			//     newXCoord = -randomXCoord;
+			// }
+
+			// else if (direction === 1){ // двигаем вправо
+			//     newXCoord = randomXCoord;
+			// }  то же самое что код ниже
+
+			newXCoord = direction === 0 
+                ? -randomXCoord 
+                : randomXCoord;
 		}
 
-	} 
-
-    function coinAnimation () {
-        let newYCoord = coinCoord.y + speed;
-        let newXCoord = coinCoord.x;
-
-        // условие на то, через сколько будет появляеться новая монетка
-        if (newYCoord > window.innerHeight) {
-            newYCoord = -250;
-
-            // расчитаем координату для появления новой монетки
-            const direction = parseInt(Math.random() * 2)
-            const randomXCoord = parseInt(Math.random() * (roadWidth / 2 + 1));
-    
-            // if (direction === 0){ // двигаем влево
-            //     newXCoord = -randomXCoord;
-            // }
-    
-            // else if (direction === 1){ // двигаем вправо 
-            //     newXCoord = randomXCoord;
-            // }  то же самое что код ниже
-    
-            newXCoord = direction === 0
-                ? -randomXCoord
-                : randomXCoord
-            }
-    
-        coinCoord.x = newXCoord;
-        coinCoord.y = newYCoord;
-        coin.style.transform = `translate(${newXCoord}px, ${newYCoord}px)`;
+		elementCoord.x = newXCoord;
+		elementCoord.y = newYCoord;
+		element.style.transform = `translate(${newXCoord}px, ${newYCoord}px)`;
     }
+
 
 
 	// вытащим расположение дерева, то есть ед. высоты окна
@@ -233,9 +222,9 @@
 		// отрисовывем разные кнопки, при нажатии на паузу останавливаем анимацию
 		if (isPause) {
 			cancelAnimationFrame(animationId);
-            cancelAnimationFrame(carMoveInfo.top);
+			cancelAnimationFrame(carMoveInfo.top);
 			cancelAnimationFrame(carMoveInfo.bottom);
-            cancelAnimationFrame(carMoveInfo.left);
+			cancelAnimationFrame(carMoveInfo.left);
 			cancelAnimationFrame(carMoveInfo.right);
 
 			gameButton.children[0].style.display = 'none';
