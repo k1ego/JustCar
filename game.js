@@ -2,35 +2,36 @@
 	let isPause = false;
 	let animationId = null;
 
-	const speed = 5;
+	let speed = 3;
+    let score = 0;
 
 	const car = document.querySelector('.car');
-	const carHeight = car.clientHeight;
-	const carWidth = car.clientWidth;
-    const carCoords = getCoords(car);
-	const carMoveInfo = {
-		top: null,
-		bottom: null,
-		left: null,
-		right: null,
-	};
+    
+	const carInfo = {
+        ...createElementInfo(car),
+        move: {
+            top: null,
+            bottom: null,
+            left: null,
+            right: null,
+        },
+    };
+
 
 	const coin = document.querySelector('.coin');
-	const coinCoord = getCoords(coin);
-	const coinWidth = coin.clientWidth;
-    const coinHeigh = coin.clientHeight;
+	const coinInfo = createElementInfo(coin);
 
 	const danger = document.querySelector('.danger');
-	// const dangerCoord = getCoords(danger);
-	// const dangerWidth = danger.clientWidth;
+	// const dangerInfo = createElementInfo(danger);
 
 	const arrow = document.querySelector('.arrow');
-	// const arrowCoord = getCoords(arrow);
-	// const arrowWidth = arrow.clientWidth;
+	// const arrowInfo = createElementInfo(arrow);
 
 	const road = document.querySelector('.road');
 	const roadHeight = road.clientHeight;
 	const roadWidth = road.clientWidth;
+
+    const gameScore = document.querySelector('.game-score')
 
 	const trees = document.querySelectorAll('.tree');
 
@@ -51,15 +52,15 @@
 		// получили нажатую кнопку
 		const code = event.code;
 
-		if (code === 'ArrowUp' && carMoveInfo.top === null) {
+		if (code === 'ArrowUp' && carInfo.move.top === null) {
 			// первоначальный и единственный запуск анимации - как раз ее мы отменяем в keyup
-			carMoveInfo.top = requestAnimationFrame(carMoveTop);
-		} else if (code === 'ArrowDown' && carMoveInfo.bottom === null) {
-			carMoveInfo.bottom = requestAnimationFrame(carMoveBottom);
-		} else if (code === 'ArrowLeft' && carMoveInfo.left === null) {
-			carMoveInfo.left = requestAnimationFrame(carMoveLeft);
-		} else if (code === 'ArrowRight' && carMoveInfo.right === null) {
-			carMoveInfo.right = requestAnimationFrame(carMoveRight);
+			carInfo.move.top = requestAnimationFrame(carMoveTop);
+		} else if (code === 'ArrowDown' && carInfo.move.bottom === null) {
+			carInfo.move.bottom = requestAnimationFrame(carMoveBottom);
+		} else if (code === 'ArrowLeft' && carInfo.move.left === null) {
+			carInfo.move.left = requestAnimationFrame(carMoveLeft);
+		} else if (code === 'ArrowRight' && carInfo.move.right === null) {
+			carInfo.move.right = requestAnimationFrame(carMoveRight);
 		}
 	});
 
@@ -69,60 +70,71 @@
 		const code = event.code;
 
 		if (code === 'ArrowUp') {
-			cancelAnimationFrame(carMoveInfo.top);
-			carMoveInfo.top = null;
+			cancelAnimationFrame(carInfo.move.top);
+			carInfo.move.top = null;
 		} else if (code === 'ArrowDown') {
-			cancelAnimationFrame(carMoveInfo.bottom);
-			carMoveInfo.bottom = null;
+			cancelAnimationFrame(carInfo.move.bottom);
+			carInfo.move.bottom = null;
 		} else if (code === 'ArrowLeft') {
-			cancelAnimationFrame(carMoveInfo.left);
-			carMoveInfo.left = null;
+			cancelAnimationFrame(carInfo.move.left);
+			carInfo.move.left = null;
 		} else if (code === 'ArrowRight') {
-			cancelAnimationFrame(carMoveInfo.right);
-			carMoveInfo.right = null;
+			cancelAnimationFrame(carInfo.move.right);
+			carInfo.move.right = null;
 		}
 	});
 
-	// опишем движение машинки на кнопках
+    // создание элементов 
+    function createElementInfo(element) {
+    return {
+        coords: getCoords(element),
+        height: element.clientHeight,
+        width: element.clientWidth,
+        visible: true,
+        };
+    }
 
+
+
+	// опишем движение машинки на кнопках
 	function carMoveTop() {
-		const newY = carCoords.y - 5;
+		const newY = carInfo.coords.y - 5;
 		// не даем выехать за пределы экрана вверх
 		// if (newY < 0) return;
 
-		carCoords.y = newY;
-		carToMove(carCoords.x, newY);
-		carMoveInfo.top = requestAnimationFrame(carMoveTop);
+		carInfo.coords.y = newY;
+		carToMove(carInfo.coords.x, newY);
+		carInfo.move.top = requestAnimationFrame(carMoveTop);
 	}
 
 	function carMoveBottom() {
-		const newY = carCoords.y + 5;
+		const newY = carInfo.coords.y + 5;
 		// не даем выехать за нижние пределы экрана
-		// if (newY + carHeight > roadHeight) return;
+		// if (newY + carInfo.height > roadHeight) return;
 
-		carCoords.y = newY;
-		carToMove(carCoords.x, newY);
-		carMoveInfo.bottom = requestAnimationFrame(carMoveBottom);
+		carInfo.coords.y = newY;
+		carToMove(carInfo.coords.x, newY);
+		carInfo.move.bottom = requestAnimationFrame(carMoveBottom);
 	}
 
 	function carMoveLeft() {
-		const newX = carCoords.x - 5;
+		const newX = carInfo.coords.x - 5;
 
-		// if (newX < -roadWidth / 2 + carWidth / 2) return;
+		// if (newX < -roadWidth / 2 + carInfo.width / 2) return;
 
-		carCoords.x = newX;
-		carToMove(newX, carCoords.y);
-		carMoveInfo.left = requestAnimationFrame(carMoveLeft);
+		carInfo.coords.x = newX;
+		carToMove(newX, carInfo.coords.y);
+		carInfo.move.left = requestAnimationFrame(carMoveLeft);
 	}
 
 	function carMoveRight() {
-		const newX = carCoords.x + 5;
+		const newX = carInfo.coords.x + 5;
 
-		// if (newX > roadWidth / 2 - carWidth / 2) return;
+		// if (newX > roadWidth / 2 - carInfo.width / 2) return;
 
-		carCoords.x = newX;
-		carToMove(newX, carCoords.y);
-		carMoveInfo.right = requestAnimationFrame(carMoveRight);
+		carInfo.coords.x = newX;
+		carToMove(newX, carInfo.coords.y);
+		carInfo.move.right = requestAnimationFrame(carMoveRight);
 	}
 
 	// перезапись анимации машинки при нажатии на кнопку
@@ -134,9 +146,23 @@
 
 	function startGame() {
 		treesAnimation();
-		elementAyimation (coin, coinCoord, coinWidth, -100);
-        // elementAyimation (danger, dangerCoord, dangerWidth, -250);
-        // elementAyimation (arrow, arrowCoord, arrowWidth, -600);
+		elementAnimation (coin, coinInfo, -100);
+
+        if (coinInfo.visible && hasCollision(carInfo, coinInfo)) {
+            score++;
+            gameScore.innerText = score;
+            coin.style.display = 'none';
+            coinInfo.visible = false;
+
+            // увеличиваем скорость при увеличении счета
+            if (score % 3 === 0) speed += 2;
+        }
+
+
+
+        // elementAnimation (danger, dangerCoords, dangerWidth, -250);
+        // elementAnimation (arrow, arrowCoord, arrowWidth, -600);
+
 		animationId = requestAnimationFrame(startGame);
 	}
 
@@ -168,10 +194,10 @@
 
 
 
-    function elementAyimation (element, elementCoord, elementWidth, elementYInitialCoord) {
+    function elementAnimation (element, elementInfo, elementYInitialCoord) {
 
-		let newYCoord = elementCoord.y + speed;
-		let newXCoord = elementCoord.x;
+		let newYCoord = elementInfo.coords.y + speed;
+		let newXCoord = elementInfo.coords.x;
 
 		// условие на то, если монетка вышла за пределы экрана
 		// и через сколько будет появляеться новая монетка
@@ -181,7 +207,7 @@
 			// расчитаем координату для появления новой монетки
 			const direction = parseInt(Math.random() * 2);
 			// дорога попалам и ширина монетки попалам, чтобы рендер был в пределах дороги
-			const maxXCoord = roadWidth / 2 + 1 - elementWidth / 2;
+			const maxXCoord = roadWidth / 2 + 1 - elementInfo.width / 2;
 			const randomXCoord = parseInt(Math.random() * maxXCoord);
 
 			// if (direction === 0){ // двигаем влево
@@ -192,13 +218,19 @@
 			//     newXCoord = randomXCoord;
 			// }  то же самое что код ниже
 
+
+            // элемент будет отображаться с установленным по умолчанию значением
+            element.style.display = 'initial';
+            // после удаления монетки она заново отрисуется за пределами экрана
+            elementInfo.visible = true;
+
 			newXCoord = direction === 0 
                 ? -randomXCoord 
                 : randomXCoord;
 		}
 
-		elementCoord.x = newXCoord;
-		elementCoord.y = newYCoord;
+		elementInfo.coords.x = newXCoord;
+		elementInfo.coords.y = newYCoord;
 		element.style.transform = `translate(${newXCoord}px, ${newYCoord}px)`;
     }
 
@@ -217,18 +249,19 @@
 	}
 
     // реализация коллизии для элементов
-    function hasCollision () {
-        const carYTop = carCoords.y;
-        const carYBottom = carCoords.y + carHeight;
+    // параметры функции отвечают сразу за 6 переменных
+    function hasCollision (elem1Info, elem2Info) {
+        const carYTop = elem1Info.coords.y;
+        const carYBottom = elem1Info.coords.y + elem1Info.height;
 
-        const carXLeft = carCoords.x - carWidth / 2; // (-carWidth/2) тк позиционирование происходит от центра,
-        const carXright = carCoords.x + carWidth / 2; // без этого берем еще половину машинки, где ее нет.
+        const carXLeft = elem1Info.coords.x - elem1Info.width / 2; // (-carInfo.width/2) тк позиционирование происходит от центра,
+        const carXright = elem1Info.coords.x + elem1Info.width / 2; // без этого берем еще половину машинки, где ее нет.
 
-        const coinYTop = coinCoord.y;
-        const coinYBottom = coinCoord.y + coinHeigh;
+        const coinYTop = elem2Info.coords.y;
+        const coinYBottom = elem2Info.coords.y + elem2Info.height;
 
-        const coinXLeft = coinCoord.x - coinWidth / 2;
-        const coinXright = coinCoord.x + coinWidth / 2;
+        const coinXLeft = elem2Info.coords.x - elem2Info.width / 2;
+        const coinXright = elem2Info.coords.x + elem2Info.width / 2;
 
 
         if (carYTop > coinYBottom || carYBottom < coinYTop) { // условие на отсутствие коллизии по OY
@@ -249,10 +282,10 @@
 		// отрисовывем разные кнопки, при нажатии на паузу останавливаем анимацию
 		if (isPause) {
 			cancelAnimationFrame(animationId);
-			cancelAnimationFrame(carMoveInfo.top);
-			cancelAnimationFrame(carMoveInfo.bottom);
-			cancelAnimationFrame(carMoveInfo.left);
-			cancelAnimationFrame(carMoveInfo.right);
+			cancelAnimationFrame(carInfo.move.top);
+			cancelAnimationFrame(carInfo.move.bottom);
+			cancelAnimationFrame(carInfo.move.left);
+			cancelAnimationFrame(carInfo.move.right);
 
 			gameButton.children[0].style.display = 'none';
 			gameButton.children[1].style.display = 'initial';
