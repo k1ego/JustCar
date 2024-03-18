@@ -52,6 +52,11 @@
 		// условие, чтобы машинка не вдигалась во время паузы
 		if (isPause) return;
 
+        // условие, чтобы машинка не двигалась после завершения игры
+        if (hasCollision(carInfo, dangerInfo)) {
+            return finishGame();
+        }
+
 		// получили нажатую кнопку
 		const code = event.code;
 
