@@ -60,14 +60,14 @@
 		// получили нажатую кнопку
 		const code = event.code;
 
-		if (code === 'ArrowUp' || code === 'KeyW' && carInfo.move.top === null) {
+		if ((code === 'ArrowUp' || code === 'KeyW') && carInfo.move.top === null) {
 			// первоначальный и единственный запуск анимации - как раз ее мы отменяем в keyup
 			carInfo.move.top = requestAnimationFrame(carMoveTop);
-		} else if (code === 'ArrowDown' || code === 'KeyS' && carInfo.move.bottom === null) {
+		} else if ((code === 'ArrowDown' || code === 'KeyS') && carInfo.move.bottom === null) {
 			carInfo.move.bottom = requestAnimationFrame(carMoveBottom);
-		} else if (code === 'ArrowLeft' || code === 'KeyA' && carInfo.move.left === null) {
+		} else if ((code === 'ArrowLeft' || code === 'KeyA') && carInfo.move.left === null) {
 			carInfo.move.left = requestAnimationFrame(carMoveLeft);
-		} else if (code === 'ArrowRight' || code === 'KeyD' && carInfo.move.right === null) {
+		} else if ((code === 'ArrowRight' || code === 'KeyD') && carInfo.move.right === null) {
 			carInfo.move.right = requestAnimationFrame(carMoveRight);
 		}
 	});
